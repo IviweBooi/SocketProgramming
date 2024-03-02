@@ -12,9 +12,6 @@ VISIBILITY_MSG = "visibility"
 # Array list to store the connections
 connections = []
 visibility = []
-for i in connections:
-    visibility.append(True)
-
 
 def handle_client(com_socket, addr):
     print(f"[NEW CONNECTION] The server is connected to {addr} ")
@@ -26,6 +23,9 @@ def handle_client(com_socket, addr):
         # message received from the communication client socket
         if msg.lower() == DISCONNECT_MSG:
             connected = False
+            index = connections.index(addr)
+            visibility.pop(index)
+            
             print(f"[DISCONNECTION] The server is disconnected from {addr}")
 
         elif msg.lower() == VIEW_CONNECTIONS_MSG:
@@ -35,25 +35,25 @@ def handle_client(com_socket, addr):
             for i in range(0, len(connections)):
                 if visibility[i]:
                     response = f"{response} {count}. {connections[i]}\n"
-                count += 1
+                    count += 1
+                
             com_socket.send(response.encode(FORMAT))
+            #print("This is visibility array: ", visibility)
         elif msg.lower() == VISIBILITY_MSG :
             visibility_prompt = com_socket.recv(SIZE).decode(FORMAT).lower()  # Receive visibility preference from client
-            if visibility_prompt.lower() == "No":
+            if visibility_prompt.lower() == "no":
                 index = connections.index(addr)
-                connections.remove(addr) #New line added
-                print(addr)
                 visibility[index] = False
-
             else:
                 index = connections.index(addr)
-                print(index)
+                #print(index)
                 visibility[index] = True
+                #print("This is visibility array: ", visibility)
 
         else:
             response = "[ERROR] request message not understood by server!!!"
             com_socket.send(response.encode(FORMAT))
-    print(visibility)
+    #print(visibility)
     com_socket.close()
     connections.remove(addr)  # Remove the connection ADDR from the list after disconnection
 

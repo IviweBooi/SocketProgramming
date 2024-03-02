@@ -12,7 +12,7 @@ VISIBILITY_MSG = "visibility"
 def main():
     """ TCP """
     options = eval(input("Select the number of the end-system you would like to communicate with and hit "
-                         "enter:\n1.Server\n2.Client\n>> "))
+                         "enter:\n1.Server\n2.Client\n :"))
 
     if options == 1:
         """server option"""
@@ -35,7 +35,7 @@ def main():
 
             request = input("[REQUEST] Please enter one of the following commands to interact with the server:\n1.To "
                             "disconnect from the server, type 'disconnect'.\n2.To view the list of active clients, "
-                            "type 'connections'.\n3.To change visibility permissions, type 'visibility'.\n>>")
+                            "type 'connections'.\n3.To change visibility permissions, type 'visibility'.\n :")
             client.send(request.encode(FORMAT))
             if request.lower() == DISCONNECT_MSG:
                 connected = False  # The client disconnects from the server
@@ -44,7 +44,7 @@ def main():
                 print(client.recv(SIZE).decode(FORMAT))  # Displays the server's response
             elif request.lower() == VISIBILITY_MSG:
                 visibility = input("[VISIBILITY] Do you want to be visible to certain clients when connected to this "
-                                   "server?\n1.To be visible, Type 'yes'\n2.To be invisible, Type 'no'\n>>")
+                                   "server?\n1.To be visible, Type 'yes'\n2.To be invisible, Type 'no'\n :")
                 client.send(visibility.encode(FORMAT))
                 print(client.recv(SIZE).decode(FORMAT))
             else:
@@ -92,6 +92,7 @@ def main():
 
         send_thread.start()
         receive_thread.start()
+        
 
     else:
         print("[ERROR] You have entered an invalid number!!!")
