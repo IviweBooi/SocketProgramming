@@ -29,6 +29,8 @@ def main():
         except (socket.gaierror, ConnectionRefusedError):
             print(f"[Error] Server {ADDR} can't be reached!!!")
             return
+        addressArray = (client.recv(SIZE).decode(FORMAT)).split(":") 
+        print(addressArray[0])
         client.send(username.encode(FORMAT))#send username to server
         connected = True
         '''While the client is still connected to the server'''

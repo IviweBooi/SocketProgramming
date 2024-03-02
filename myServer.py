@@ -76,7 +76,7 @@ def main():
 
     while True:
         com_socket, addr = server.accept()  # server accept connection from communication socket.
-
+        com_socket.send(f"{addr[0]}:{addr[1]}".encode(FORMAT))
         # create a separate thread for the server to handle the accepted client.
         thread = threading.Thread(target=handle_client, args=(com_socket, addr))
         thread.start()
