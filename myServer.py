@@ -9,6 +9,7 @@ FORMAT = 'utf-8'
 DISCONNECT_MSG = "disconnect"
 VIEW_CONNECTIONS_MSG = "connections"
 VISIBILITY_MSG = "visibility"
+CONTACT_MSG = "contact"
 # Array list to store the connections
 connections = []
 visibility = []
@@ -57,7 +58,15 @@ def handle_client(com_socket, addr):
                 visibility[index] = True
                 com_socket.send("[RESPONSE] visibility enabled!".encode(FORMAT))
                 #print("This is visibility array: ", visibility)
-
+        elif msg.lower() == CONTACT_MSG:
+            client_name = com_socket.recv(SIZE).decode(FORMAT).lower()
+            print("Message received:", client_name)
+            index = usernames.index(client_name)
+            if index==-1:
+                 com_socket.send("[RESPONSE] Client name is not available or exist!".encode(FORMAT))
+            else:
+                print(f"{connections[index][0]}:{connections[index][1]}")
+                com_socket.send(f"{connections[index][0]}:{connections[index][1]}".encode(FORMAT)) #IP ADDRESS OF RECIEVER
         else:
             response = "[ERROR] request message not understood by server!!!"
             com_socket.send(response.encode(FORMAT))
