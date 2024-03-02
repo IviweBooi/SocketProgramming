@@ -12,12 +12,17 @@ VISIBILITY_MSG = "visibility"
 # Array list to store the connections
 connections = []
 visibility = []
+usernames = []
 
 def handle_client(com_socket, addr):
     print(f"[NEW CONNECTION] The server is connected to {addr} ")
     connections.append(addr)  # Add new connection ADDR to the list
     visibility.append(True)
     connected = True
+    username = com_socket.recv(SIZE).decode(FORMAT).lower()
+    #com_socket.send("username recieved!".encode(FORMAT))
+    usernames.append(username)
+    
     while connected:
         msg = com_socket.recv(SIZE).decode(FORMAT).lower()  # Convert received message to lowercase
         # message received from the communication client socket
@@ -25,6 +30,7 @@ def handle_client(com_socket, addr):
             connected = False
             index = connections.index(addr)
             visibility.pop(index)
+            usernames.pop(index)
             
             print(f"[DISCONNECTION] The server is disconnected from {addr}")
 
@@ -34,7 +40,7 @@ def handle_client(com_socket, addr):
             count = 1
             for i in range(0, len(connections)):
                 if visibility[i]:
-                    response = f"{response} {count}. {connections[i]}\n"
+                    response = f"{response} {count}. {usernames[i]} :{connections[i]}\n"
                     count += 1
                 
             com_socket.send(response.encode(FORMAT))
@@ -44,10 +50,12 @@ def handle_client(com_socket, addr):
             if visibility_prompt.lower() == "no":
                 index = connections.index(addr)
                 visibility[index] = False
+                com_socket.send("[RESPONSE] visibility disabled!".encode(FORMAT))
             else:
                 index = connections.index(addr)
                 #print(index)
                 visibility[index] = True
+                com_socket.send("[RESPONSE] visibility enabled!".encode(FORMAT))
                 #print("This is visibility array: ", visibility)
 
         else:

@@ -19,6 +19,7 @@ def main():
 
         HOST = input("Enter the IP Address of the server you wish to establish a connection with: ")  # Host IP address
         PORT = eval(input("Enter the PORT # of the server: "))
+        username = input("Enter your username: ")
         ADDR = (HOST, PORT)
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # client communication socket
@@ -28,7 +29,7 @@ def main():
         except (socket.gaierror, ConnectionRefusedError):
             print(f"[Error] Server {ADDR} can't be reached!!!")
             return
-
+        client.send(username.encode(FORMAT))#send username to server
         connected = True
         '''While the client is still connected to the server'''
         while connected:
@@ -71,7 +72,7 @@ def main():
             client_socket.close()
 
         def receive_message():
-            listen_host = 'Localhost'
+            listen_host = 'localhost'
             listen_port = 54321
 
             # Create a UDP socket
@@ -83,7 +84,7 @@ def main():
             while True:
                 data, addr = client_socket.recvfrom(1024)
                 message = data.decode()
-                print(f"\n[MESSAGE] Received message from Client 2: {message}")
+                print(f"\n[MESSAGE] Received message from {addr[0]}: {message}")
 
         #  Start the send and receive functions in separate threads
         send_thread = threading.Thread(target=send_message)
