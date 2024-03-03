@@ -11,9 +11,37 @@ CONTACT_MSG = "contact"
 
 
 def main():
+    
     """ TCP """
     if True:
-        """server option"""
+        def send_message(target_host, target_port):
+                    # Create a UDP socket
+                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                    active = True  # The client is active to send and receive messages
+                    message="exit"
+                    while active:
+                        message = input("Enter a message (or 'exit' to quit): ")
+                        if message.lower() == "exit":
+                            break
+
+                        # Send the message to Client 2
+                        client_socket.sendto(f"{username}~ {message}".encode(), (target_host, target_port))#messaging
+
+                    # Close the socket
+                    if message == "exit":
+                        client_socket.close()
+
+        def receive_message(listen_host,listen_port):
+                    # Create a UDP socket
+                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                    # Bind the socket to a specific address and port
+                    client_socket.bind((listen_host, listen_port))
+                    while True:
+                        data, addr = client_socket.recvfrom(1024)
+                        message = data.decode()
+                        print(f"\n[MESSAGE] Received message from {addr[0]}: {message}")
+      #Sign In with username
+      
         print("sign in: \n")
         username = input("Enter your username: ")
         HOST = input("Enter the IP Address of the server you wish to establish a connection with: ")  # Host IP address
@@ -26,9 +54,11 @@ def main():
             client.connect(ADDR)  # connecting the client to the server
             print(f"\n[CONNECTED] Client connected to server at {HOST}:{PORT}")
         except (socket.gaierror, ConnectionRefusedError):
-            print(f"[Error] Server {ADDR} can't be reached!!!")
+            print(f"[Error] Server {ADDR} can't be reached!!!") 
             return
         addressArray = (client.recv(SIZE).decode(FORMAT)).split(":") 
+        receive_thread = threading.Thread(target=receive_message, args=(addressArray[0], int(addressArray[1])+1))
+        receive_thread.start()
         print("This is the current client's IP:",addressArray[0],"and PORT connected with server: ",addressArray[1])
         client.send(username.encode(FORMAT)) #send username to server
         connected = True
@@ -54,38 +84,15 @@ def main():
                 client.send(client_name.encode(FORMAT))
                 clientInfo = (client.recv(SIZE).decode(FORMAT)).split(":") #client's information(we want to send to)
                 print(clientInfo)
-                def send_message(target_host, target_port):
-                    # Create a UDP socket
-                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    active = True  # The client is active to send and receive messages
-                    while active:
-                        message = input("Enter a message (or 'exit' to quit): ")
-                        if message.lower() == "exit":
-                            break
-
-                        # Send the message to Client 2
-                        client_socket.sendto(f"{username}~ {message}".encode(), (target_host, target_port))#messaging
-
-                    # Close the socket
-                    client_socket.close()
-
-                def receive_message(listen_host,listen_port):
-                    # Create a UDP socket
-                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    # Bind the socket to a specific address and port
-                    client_socket.bind((listen_host, listen_port))
-                    while True:
-                        data, addr = client_socket.recvfrom(1024)
-                        message = data.decode()
-                        print(f"\n[MESSAGE] Received message from {addr[0]}: {message}")
+                
 
                 #  Start the send and receive functions in separate threads
-                print(int(clientInfo[1])+1)
-                print(int(addressArray[1])+1)
+                
                 send_thread = threading.Thread(target=send_message, args=(clientInfo[0], int(clientInfo[1])+1))
-                receive_thread = threading.Thread(target=receive_message, args=(addressArray[0], int(addressArray[1])))
-                receive_thread.start()
+                
+                
                 send_thread.start()
+                
                 
             else:
                 print(client.recv(SIZE).decode(FORMAT))
