@@ -1,13 +1,13 @@
 import socket
 import threading
-#h
+
 SIZE = 1024
 FORMAT = 'utf-8'
 DISCONNECT_MSG = "disconnect"
 CONNECTIONS_MSG = "connections"
 VISIBILITY_MSG = "visibility"
 CONTACT_MSG = "contact"
-#hi
+
 
 def main():
     """ TCP """
@@ -30,73 +30,78 @@ def main():
         addressArray = (client.recv(SIZE).decode(FORMAT)).split(":")
         print("This is the current client's IP:", addressArray[0], "and PORT connected with server: ", addressArray[1])
         client.send(username.encode(FORMAT))  # send username to server
-        connected = True
+        # connected = True
         '''While the client is still connected to the server'''
-        while connected:
 
-            request = input("[REQUEST] Please enter one of the following commands to interact with the server:\n1.To "
-                            "disconnect from the server, type 'disconnect'.\n2.To view the list of active clients, "
-                            "type 'connections'.\n3.To change visibility permissions, type 'visibility'.\n4.To contact a client, type 'contact'\n :")
-            client.send(request.encode(FORMAT))
-            if request.lower() == DISCONNECT_MSG:
-                connected = False  # The client disconnects from the server
+        def prompter(connected):
+            while connected:
 
-            elif request.lower() == CONNECTIONS_MSG:
-                print(client.recv(SIZE).decode(FORMAT))  # Displays the server's response
-            elif request.lower() == VISIBILITY_MSG:
-                visibility = input("[VISIBILITY] Do you want to be visible to certain clients when connected to this "
-                                   "server?\n1.To be visible, Type 'yes'\n2.To be invisible, Type 'no'\n :")
-                client.send(visibility.encode(FORMAT))
-                print(client.recv(SIZE).decode(FORMAT))
-            elif request.lower() == CONTACT_MSG:  # SEND TO A CLIENT
-                client_name = input("[CHAT_REQ] Enter the name of the client you with to contact: ")
-                client.send(client_name.encode(FORMAT))
-                clientInfo = (client.recv(SIZE).decode(FORMAT)).split(":")  # client's information(we want to send to)
-                print(clientInfo)
+                request = input("[REQUEST] Please enter one of the following commands to interact with the "
+                                "server:\n1.To"
+                                "disconnect from the server, type '1'.\n2.To view the list of active clients, "
+                                "type '2'.\n3.To change visibility permissions, type '3'.\n4.To "
+                                "contact a client, type '4'\n :")
+                client.send(request.encode(FORMAT))
+                if request == '1':
+                    connected = False  # The client disconnects from the server
 
-                def send_message(target_host, target_port):
-                    # Create a UDP socket
-                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    active = True  # The client is active to send and receive messages
-                    while active:
-                        message = input("[CHATTING] Enter a message (or 'exit' to quit): ")
-                        if message.lower() == "exit":
-                            active = False
+                elif request == '2':
+                    print(client.recv(SIZE).decode(FORMAT))  # Displays the server's response
+                elif request == '3':
+                    visibility = input("[VISIBILITY] Do you want to be visible to certain clients when connected to "
+                                       "this"
+                                       "server?\n1.To be visible, Type 'yes'\n2.To be invisible, Type 'no'\n :")
+                    client.send(visibility.encode(FORMAT))
+                    print(client.recv(SIZE).decode(FORMAT))
+                elif request == '4':  # SEND TO A CLIENT
+                    client_name = input("[CHAT_REQ] Enter the name of the client you with to contact: ")
+                    client.send(client_name.encode(FORMAT))
+                    clientInfo = (client.recv(SIZE).decode(FORMAT)).split(":")  # client's information(we want to send to)
+                    print(clientInfo)
 
-                        # Send the message to Client 2
-                        client_socket.sendto(f"{username}~ {message}".encode(), (target_host, target_port))  # messaging
-                    client_socket.close()
-                    # Close the socket
+                    def send_message(target_host, target_port):
+                        # Create a UDP socket
+                        client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                        active = True  # The client is active to send and receive messages
+                        while active:
+                            message = input("[CHATTING] Enter a message (or 'exit' to quit): ")
+                            if message.lower() == "exit":
+                                prompter(True)
 
-                def receive_message(listen_host, listen_port):
-                    # Create a UDP socket
-                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    # Bind the socket to a specific address and port
-                    client_socket.bind((listen_host, listen_port))
+                            # Send the message to Client 2
+                            client_socket.sendto(f"{username}~ {message}".encode(), (target_host, target_port))  # messaging
+                        client_socket.close()
 
-                    while True:
-                        data, addr = client_socket.recvfrom(1024)
-                        message = data.decode()
-                        print(f"\n[MESSAGE] Received message from {addr[0]}: {message}")
+                    def receive_message(listen_host, listen_port):
+                        # Create a UDP socket
+                        client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                        # Bind the socket to a specific address and port
+                        client_socket.bind((listen_host, listen_port))
 
-                        # client_socket.close()
+                        while True:
+                            data, addr = client_socket.recvfrom(1024)
+                            message = data.decode()
+                            print(f"\n[MESSAGE] Received message from {addr[0]}: {message}")
+
+                            # client_socket.close()
                 #  Start the send and receive functions in separate threads
-                send_thread = threading.Thread(target=send_message, args=(clientInfo[0], int(clientInfo[1]) + 1))
-                receive_thread = threading.Thread(target=receive_message, args=(addressArray[0], int(addressArray[1])+1))
-                count = 0
-                while count < 10:
-                    send_thread.start()
-                    receive_thread.start()
-                    send_thread.join()
-                    receive_thread.join()
+                    send_thread = threading.Thread(target=send_message, args=(clientInfo[0], int(clientInfo[1]) + 1))
+                    receive_thread = threading.Thread(target=receive_message, args=(addressArray[0], int(addressArray[1])+1))
+                    count = 0
+                    while count < 10:
+                        send_thread.start()
+                        receive_thread.start()
+                        send_thread.join()
+                        receive_thread.join()
 
-                    count += 1
-                    if count == 10:
-                        p = input("session is about to time out, Do you want to continue chatting?[yes or no]\n")
-                        if p == "yes":
-                            count = 0
+                        count += 1
+                        if count == 10:
+                            p = input("session is about to time out, Do you want to continue chatting?[yes or no]\n")
+                            if p == "yes":
+                                count = 0
             else:
-                print(client.recv(SIZE).decode(FORMAT))
+                print("Please select a valid option! from the list > [1, 2, 3, 4 ]")
+        prompter(True)
 
 
 if __name__ == "__main__":
