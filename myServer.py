@@ -28,7 +28,7 @@ def handle_client(com_socket, addr):
     while connected:
         msg = com_socket.recv(SIZE).decode(FORMAT)  # Convert received message to lowercase
         # message received from the communication client socket
-        if msg == '1':
+        if msg == "1":
             connected = False
             index = connections.index(addr)
             visibility.pop(index)
@@ -36,7 +36,7 @@ def handle_client(com_socket, addr):
 
             print(f"[DISCONNECTION] The server is disconnected from {addr}")
 
-        elif msg == '2':
+        elif msg == "2":
             print(f"[REQUEST] msg from client {ADDR}")
             response = "Connections active: \n"
             count = 1
@@ -47,7 +47,7 @@ def handle_client(com_socket, addr):
 
             com_socket.send(response.encode(FORMAT))
             # print("This is visibility array: ", visibility)
-        elif msg == '3':
+        elif msg == "3":
             visibility_prompt = com_socket.recv(SIZE).decode(
                 FORMAT).lower()  # Receive visibility preference from client
             if visibility_prompt.lower() == "no":
@@ -60,7 +60,7 @@ def handle_client(com_socket, addr):
                 visibility[index] = True
                 com_socket.send("[RESPONSE] visibility enabled!".encode(FORMAT))
                 # print("This is visibility array: ", visibility)
-        elif msg == '4':
+        elif msg == "4":
             client_name = com_socket.recv(SIZE).decode(FORMAT).lower()
             print("Message received:", client_name)
             index = usernames.index(client_name)

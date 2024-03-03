@@ -1,5 +1,9 @@
 import socket
 import threading
+# Author~ Mnelisi Mabuza
+# Student# ~ MBZMNE001
+# MESSAGING APPLICATION
+# MARCH 2024
 
 SIZE = 1024
 FORMAT = 'utf-8'
@@ -15,46 +19,42 @@ def main():
         """server option"""
         print("sign in: \n")
         username = input("Enter your username: ")
-        HOST = input("Enter the IP Address of the server you wish to establish a connection with: ")  # Host IP address
-        PORT = eval(input("Enter the PORT # of the server: "))
+        IP = input("[IP ADDRESS] | Enter the server's IP address : ")  # Host IP address
+        portNumber = eval(input("[Port number] Enter the port number of your connection: "))
 
-        ADDR = (HOST, PORT)
+        ADDR = (IP, portNumber)
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # client communication socket
         try:
             client.connect(ADDR)  # connecting the client to the server
-            print(f"\n[CONNECTED] Client connected to server at {HOST}:{PORT}")
+            print(f"\n[CONNECTED] Client connected to server at {IP}:{portNumber}")
         except (socket.gaierror, ConnectionRefusedError):
-            print(f"[Error] Server {ADDR} can't be reached!!!")
+            print(f"[Error!] | Server {ADDR} can't be reached!!!")
             return
         addressArray = (client.recv(SIZE).decode(FORMAT)).split(":")
-        print("This is the current client's IP:", addressArray[0], "and PORT connected with server: ", addressArray[1])
         client.send(username.encode(FORMAT))  # send username to server
         # connected = True
-        '''While the client is still connected to the server'''
 
         def prompter(connected):
             while connected:
 
-                request = input("[REQUEST] Please enter one of the following commands to interact with the "
-                                "server:\n1.To"
-                                "disconnect from the server, type '1'.\n2.To view the list of active clients, "
-                                "type '2'.\n3.To change visibility permissions, type '3'.\n4.To "
-                                "contact a client, type '4'\n :")
-                client.send(request.encode(FORMAT))
-                if request == '1':
+                requestM =input("[PROMPT | USER] Please select an option: (only type the number of the option)\n1. Disconnect from server!\n2. View Active users.\n3. Visibility status.\n4. Contact A client\n >>")
+                if requestM in ["1", "2", "3", "4"]:
+                    client.send(requestM.encode(FORMAT))
+                else:
+                    print("Please select a valid option! from the list > [1, 2, 3, 4 ]")
+                    prompter(True) #Start over
+                if requestM == "1":
                     connected = False  # The client disconnects from the server
 
-                elif request == '2':
+                elif requestM == "2":
                     print(client.recv(SIZE).decode(FORMAT))  # Displays the server's response
-                elif request == '3':
-                    visibility = input("[VISIBILITY] Do you want to be visible to certain clients when connected to "
-                                       "this"
-                                       "server?\n1.To be visible, Type 'yes'\n2.To be invisible, Type 'no'\n :")
+                elif requestM == "3":
+                    visibility = input("[VISIBILITY STATUS] Select a number:\n1. Enable visibility. \n2. Disable Visibility.\n")
                     client.send(visibility.encode(FORMAT))
                     print(client.recv(SIZE).decode(FORMAT))
-                elif request == '4':  # SEND TO A CLIENT
-                    client_name = input("[CHAT_REQ] Enter the name of the client you with to contact: ")
+                elif requestM == "4":  # SEND TO A CLIENT
+                    client_name = input("[Contact REQUEST] | Enter the client's [username] : ")
                     client.send(client_name.encode(FORMAT))
                     clientInfo = (client.recv(SIZE).decode(FORMAT)).split(":")  # client's information(we want to send to)
                     print(clientInfo)
@@ -64,7 +64,7 @@ def main():
                         client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                         active = True  # The client is active to send and receive messages
                         while active:
-                            message = input("[CHATTING] Enter a message (or 'exit' to quit): ")
+                            message = input("[Texting] Type a message (or 'exit' to quit): ")
                             if message.lower() == "exit":
                                 prompter(True)
 
